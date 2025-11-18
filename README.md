@@ -96,8 +96,63 @@ Prototype and build IoT systems without setting up servers or developing web sof
 
  
 # PROGRAM:
+```
+#include "ThingSpeak.h"
+#include <WiFi.h>
+char ssid[] = "RAM"; //SSID
+char pass[] = "1234567890"; // Password
+const int trigger = 25;
+const int echo = 26;
+long T;
+float distanceCM;
+WiFiClient client;
+unsigned long myChannelField = 2729936; // Channel ID
+const int ChannelField = 1; // Which channel to write data
+const char * myWriteAPIKey = "1IU0YC48I4D9SWVE"; // Your write API Key
+void setup()
+{
+Serial.begin(115200);
+pinMode(trigger, OUTPUT);
+pinMode(echo, INPUT);
+WiFi.mode(WIFI_STA);
+ThingSpeak.begin(client);
+}
+void loop()
+{
+if (WiFi.status() != WL_CONNECTED)
+{
+Serial.print("Attempting to connect to SSID: ");
+Serial.println(ssid);
+while (WiFi.status() != WL_CONNECTED)
+{
+WiFi.begin(ssid, pass);
+Serial.print(".");
+delay(5000);
+}
+Serial.println("\nConnected.");
+}
+digitalWrite(trigger, LOW);
+delay(1);
+digitalWrite(trigger, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigger, LOW);
+T = pulseIn(echo, HIGH);
+distanceCM = T * 0.034; //340 m/s or 0.034 cm/microsec
+distanceCM = distanceCM / 2;
+Serial.print("Distance in cm: ");
+Serial.println(distanceCM);
+ThingSpeak.writeField(myChannelField, ChannelField, distanceCM, myWriteAPIKey);
+delay(1000);
+}
+```
 # CIRCUIT DIAGRAM:
+![WhatsApp Image 2025-11-18 at 12 08 33_d1bf5f23](https://github.com/user-attachments/assets/fed162b7-b2f9-4872-84e2-6e7323ac2e3f)
+
 # OUTPUT:
+
+![WhatsApp Image 2025-11-18 at 12 10 42_c075c40d](https://github.com/user-attachments/assets/bc7cc858-011c-4c44-a109-3c94d982fa16)
+
+![WhatsApp Image 2025-11-18 at 12 10 41_10b7c887](https://github.com/user-attachments/assets/6e990b6e-dc4e-4426-bf18-94f3281f00ff)
 # RESULT:
 Thus the distance values are updated in the Thing speak cloud using ESP32 controller.
 
